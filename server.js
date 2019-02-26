@@ -1,11 +1,19 @@
 var http = require('http');
+var url = require('url');
 
-function startServer() {
+function startServer(route, handle) {
     function onRequest(req, res) {
-        console.log('request received!');
-        res.writeHead(200, {'content-Type': 'text/plain'});
-        res.write("Hello from our server module");
-        res.end();
+        var reviewData = "";
+        var pathname = url.parse(req.url).pathname;
+        console.log('Request received for', pathname);
+        req.setEncoding("utf8");
+        req.addListener('data', function(chunk){
+            reviewData += chunk;
+        });
+        req.addListener('end', function(chunk){
+            route(handle, pathname, res, reviewData);
+        });
+
     }
 
     http.createServer(onRequest).listen(8888);
